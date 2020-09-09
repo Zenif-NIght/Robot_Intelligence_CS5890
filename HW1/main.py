@@ -4,19 +4,20 @@
 # sample code from https://www.youtube.com/watch?v=fcryHcZE_sM&t=
 # picture: https://opengameart.org/content/animals-pack
 # picture: https://opengameart.org/content/smiling-husky-dog-portrait
-# A large part of this code was used in my multiAgent
+# A large part of this code was used in my multiAgent systems classs
 
 import pygame
 import random
 from random import choice
 import math
 import os ,sys
+import json
 
 #WIDTH = 800
 #HEIGHT = 600
 FPS = 30
-WIDTH = 640 * 2
-HEIGHT = 480 * 2
+WIDTH = 1000
+HEIGHT = 1000
 
 #             R    G    B
 # define colors
@@ -39,12 +40,12 @@ img_folder = os.path.join(game_folder, "img")
 
 
 
-def random_vec(mag, side ="", side2 = ""):
+def find_path_speed(magnitude, side ="", side2 = ""):
     isNagetive = 1
     if random.randrange(0, 10) % 2 == 0:
         isNagetive *= -1
-    x_unit = random.uniform(0.0,float(mag)) *isNagetive
-    y_unit = math.sqrt(math.pow(mag,2)-math.pow(x_unit,2) ) * isNagetive
+    x_unit = random.uniform(0.0,float(magnitude)) *isNagetive
+    y_unit = math.sqrt(math.pow(magnitude,2)-math.pow(x_unit,2) ) * isNagetive
     # CHANGE THE DIRECTION
 
     if side != side2 and side2 != "":
@@ -83,7 +84,7 @@ def top_left(selfSprite,sprite1):
     w2 = sprite1.rect.w
     if (x2 + w2 >= x1 >= x2 and y2 + h2 >= y1 >= y2):
         #print("1 TOP LEFT")
-        selfSprite.x_speed, selfSprite.y_speed = random_vec(selfSprite.magtude, "top", "left")
+        selfSprite.x_speed, selfSprite.y_speed = find_path_speed(selfSprite.magtude, "top", "left")
         return True
     else:
         return False
@@ -100,7 +101,7 @@ def top_right(selfSprite,sprite1):
     w2 = sprite1.rect.w
     if (x2 + w2 >= x1 + w1 >= x2 and y2 + h2 >= y1 >= y2):
         #print("2 TOP RIGHT")
-        selfSprite.x_speed, selfSprite.y_speed = random_vec(selfSprite.magtude, "top", "right")
+        selfSprite.x_speed, selfSprite.y_speed = find_path_speed(selfSprite.magtude, "top", "right")
         return True
     else:
         return False
@@ -117,7 +118,7 @@ def bottom_left(selfSprite,sprite1):
     w2 = sprite1.rect.w
     if (x2 + w2 >= x1 >= x2 and y2 + h2 >= y1 + h1 >= y2):
         #print("3 BOTTOM LEFT")
-        selfSprite.x_speed, selfSprite.y_speed = random_vec(selfSprite.magtude, "bottom", "left")
+        selfSprite.x_speed, selfSprite.y_speed = find_path_speed(selfSprite.magtude, "bottom", "left")
         return True
     else:
         return False
@@ -134,7 +135,7 @@ def bottom_right(selfSprite,sprite1):
     w2 = sprite1.rect.w
     if (x2 + w2 >= x1 + w1 >= x2 and y2 + h2 >= y1 + h1 >= y2):
         #print("4 BOOTOM RIGHT")
-        selfSprite.x_speed, selfSprite.y_speed = random_vec(selfSprite.magtude, "bottom", "right")
+        selfSprite.x_speed, selfSprite.y_speed = find_path_speed(selfSprite.magtude, "bottom", "right")
         return True
     else:
         return False
@@ -143,6 +144,7 @@ def bottom_right(selfSprite,sprite1):
 def detectCollisions(selfSprite,sprite1):
     #https://www.dropbox.com/s/wldf3kdylsfxio1/collision_detect.py
 
+    #  this alwos the collision to bounce off in a randome direction
     functionList = ["A","B","C","D"]
     random.shuffle(functionList)
 
@@ -169,19 +171,19 @@ class MovingThing(pygame.sprite.Sprite):
 
         if self.rect.top <= 0:
             y = 25
-            self.x_speed, self.y_speed = random_vec(self.magtude, "top")
+            self.x_speed, self.y_speed = find_path_speed(self.magtude, "top")
 
         if self.rect.bottom >= HEIGHT:
             y=HEIGHT - 25
-            self.x_speed, self.y_speed = random_vec(self.magtude, "bottom")
+            self.x_speed, self.y_speed = find_path_speed(self.magtude, "bottom")
 
         if self.rect.right >= WIDTH:
             x = WIDTH - 25
-            self.x_speed, self.y_speed = random_vec(self.magtude, "right")
+            self.x_speed, self.y_speed = find_path_speed(self.magtude, "right")
 
         if self.rect.left <= 0:
             x = 25
-            self.x_speed, self.y_speed = random_vec(self.magtude, "left")
+            self.x_speed, self.y_speed = find_path_speed(self.magtude, "left")
 
         self.rect.center = (x,y)
 
@@ -221,7 +223,7 @@ class Roomba(MovingThing):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = (random.randrange(0, WIDTH - 2), random.randrange(0, HEIGHT - 2))
-        self.y_speed, self.x_speed = random_vec(7)
+        self.y_speed, self.x_speed = find_path_speed(7)
         self.magtude = math.sqrt(math.pow(self.x_speed, 2) + math.pow(self.y_speed, 2))
 
 
@@ -242,7 +244,18 @@ class Dog(MovingThing):
         self.magtude = math.sqrt(math.pow(self.x_speed, 2) + math.pow(self.y_speed, 2))
 
 
-
+def load_tile_table(filename, width, height):
+    # http://sheep.art.pl/Tiled%20Map%20in%20PyGame
+    image = pygame.image.load(filename).convert()
+    image_width, image_height = image.get_size()
+    tile_table = []
+    for tile_x in range(0,int(image_width/width)):
+        line = []
+        tile_table.append(line)
+        for tile_y in range(0, int(image_height/height)):
+            rect = (tile_x*width, tile_y*height, width, height)
+            line.append(image.subsurface(rect))
+    return tile_table
 
 # initialize pygame and create window
 pygame.init()
@@ -253,32 +266,38 @@ clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
 rommbasList = pygame.sprite.Group()
-dogList = pygame.sprite.Group()
+# dogList = pygame.sprite.Group()
 obstaclesList = pygame.sprite.Group() #walls and fernitue
 listofSprites = pygame.sprite.Group()
 
-for roomba in range(0,10):
+for roomba in range(0,1):
     roomba = Roomba()
     all_sprites.add(roomba)
     rommbasList.add(roomba)
 
-for dog in range(0,10):
-    dog = Dog()
-    all_sprites.add(dog)
-    dogList.add(dog)
-    obstaclesList.add(dog)
+# for dog in range(0,10):
+#     dog = Dog()
+#     all_sprites.add(dog)
+#     dogList.add(dog)
+#     obstaclesList.add(dog)
 
-for obs in range(60,random.randint(80,100)):
-    print(str(obs))
-    obs = Obstacle()
-    obstaclesList.add(obs)
-    all_sprites.add(obs)
+# for obs in range(60,random.randint(80,100)):
+#     print(str(obs))
+#     obs = Obstacle()
+#     obstaclesList.add(obs)
+#     all_sprites.add(obs)
 
 #all_sprites.add(rommba1,rommba2,rommba3)
 
 # Game loop
 running = True
 screen.fill(ROCKGRAY)
+
+
+
+
+
+
 while running:
     # keep loop running at the right speed
     clock.tick(FPS)
@@ -291,22 +310,27 @@ while running:
     # Update
     all_sprites.update()
 
+    table = load_tile_table(img_folder+"/tile.png", 10, 10)
+    for x, row in enumerate(table):
+        for y, tile in enumerate(row):
+            screen.blit(tile, (x*100, y*100))
+
+    # screen.fill(ROCKGRAY)
     for roomba in rommbasList:
         roomba.collisionCheck(all_sprites)
         pygame.draw.circle(screen, WHITE, roomba.rect.center, 40)
-
+    
     #for roomba in carpet
 
-    #Crash in to only other dogs
-    for dog in dogList:
-        dog.collisionCheck(dogList)
-        dog.collisionCheck(obstaclesList)
-        pygame.draw.circle(screen, GRAY, dog.rect.center, 40)
+    # #Crash in to only other dogs
+    # for dog in dogList:
+    #     dog.collisionCheck(dogList)
+    #     dog.collisionCheck(obstaclesList)
+    #     pygame.draw.circle(screen, GRAY, dog.rect.center, 40)
 
 
     # Draw / render
 
-    #screen.fill(ROCKGRAY)
     all_sprites.draw(screen)
     # *after* drawing everything, flip the display
 
