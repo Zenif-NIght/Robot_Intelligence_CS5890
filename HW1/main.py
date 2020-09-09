@@ -171,21 +171,21 @@ class MovingThing(pygame.sprite.Sprite):
         self.rect.x += self.x_speed
         self.rect.y += self.y_speed
         x, y = self.rect.center
-
+        bounceOff = 50
         if self.rect.top <= 0:
-            y = 25
+            y = bounceOff
             self.x_speed, self.y_speed = find_path_speed(self.magtude, "top")
 
         if self.rect.bottom >= HEIGHT:
-            y=HEIGHT - 25
+            y=HEIGHT - bounceOff
             self.x_speed, self.y_speed = find_path_speed(self.magtude, "bottom")
 
         if self.rect.right >= WIDTH:
-            x = WIDTH - 25
+            x = WIDTH - bounceOff
             self.x_speed, self.y_speed = find_path_speed(self.magtude, "right")
 
         if self.rect.left <= 0:
-            x = 25
+            x = bounceOff
             self.x_speed, self.y_speed = find_path_speed(self.magtude, "left")
 
         self.rect.center = (x,y)
@@ -231,10 +231,10 @@ class Roomba(MovingThing):
         self.maxVelocity =SCALE* data['maxVelocity']
         self.get_JSON_info()
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(("img/roomBA.png")).convert()
+        self.image = pygame.image.load(("img/roomba10x10.png")).convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.center = (random.randrange(0, WIDTH - 2), random.randrange(0, HEIGHT - 2))
+        self.rect.center = (SCALE*self.start[0],SCALE*self.start[1])#(random.randrange(0, WIDTH - 2), random.randrange(0, HEIGHT - 2))
         self.y_speed, self.x_speed = find_path_speed(magnitude=self.maxVelocity) #5 m/s
         self.magtude = math.sqrt(math.pow(self.x_speed, 2) + math.pow(self.y_speed, 2))
 
@@ -339,10 +339,10 @@ while running:
 
     # redraw background
     screen.fill(ROCKGRAY)
-    table = load_tile_table("img/tile.png", 10, 10)
+    table = load_tile_table("img/tile.png", 1, 1)
     for x, row in enumerate(table):
         for y, tile in enumerate(row):
-            screen.blit(tile, (x*100, y*100))
+            screen.blit(tile, (x*10, y*10))
 
     # redraw time
     TimeFount = INVFONT.render("Elapsed Time:{0:02}".format(Minute)+ ":{0:02}".format(Second) ,1, BLACK)
@@ -355,7 +355,7 @@ while running:
 
     for roomba in rommbasList:
         roomba.collisionCheck(all_sprites)
-        pygame.draw.circle(screen, WHITE, roomba.rect.center, 40)
+        pygame.draw.circle(screen, WHITE, roomba.rect.center, 10)
     
     #for roomba in carpet
 
