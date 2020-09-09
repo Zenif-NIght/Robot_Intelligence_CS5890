@@ -13,15 +13,15 @@ import math
 import os ,sys
 import json
 
-#WIDTH = 800
-#HEIGHT = 600
+
 FPS = 30
 WIDTH = 1000
 HEIGHT = 1000
+# 100 meaters *SCALE = 1000 pxlz
+SCALE = ( 100/WIDTH) #  = world width/game width
 
 #             R    G    B
 # define colors
-
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -33,10 +33,13 @@ ROCKGRAY = (116, 137, 170)
 BROWN = (101, 67, 33)
 GRAY = (133,133,133)
 BGCOLOR = BLACK
+TEXTCOLOR = (255, 255, 255)
 
-
-game_folder = os.path.dirname(__file__)
-img_folder = os.path.join(game_folder, "img")
+#Time Info
+Time = 0
+Second = 0
+Minute = 0
+counter=0
 
 
 
@@ -213,19 +216,27 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.center =(random.randrange(int(self.rect.w/2), int(WIDTH - self.rect.w/2)), random.randrange(int(self.rect.h/2), int(HEIGHT - self.rect.h/2)))
 
 
-
-
-
 class Roomba(MovingThing):
+    def get_JSON_info(self):
+        jsfilename ="config_assignment2.json"
+        with open(jsfilename) as json_file:
+            data = json.load(json_file)
+            return data
+
+
     def __init__(self):
+        data = self.get_JSON_info()
+        self.start = data['start']
+        self.goal = data['goal']
+        self.maxVelocity =SCALE* data['maxVelocity']
+        self.get_JSON_info()
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(img_folder, "roomBA.png")).convert()
+        self.image = pygame.image.load(("img/roomBA.png")).convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = (random.randrange(0, WIDTH - 2), random.randrange(0, HEIGHT - 2))
-        self.y_speed, self.x_speed = find_path_speed(7)
+        self.y_speed, self.x_speed = find_path_speed(magnitude=self.maxVelocity) #5 m/s
         self.magtude = math.sqrt(math.pow(self.x_speed, 2) + math.pow(self.y_speed, 2))
-
 
 
 class Dog(MovingThing):
@@ -257,9 +268,24 @@ def load_tile_table(filename, width, height):
             line.append(image.subsurface(rect))
     return tile_table
 
+# ##### THE START OF EVERYTHING ##### 
+
 # initialize pygame and create window
 pygame.init()
 pygame.mixer.init()
+#Fonts
+INVFONT = pygame.font.Font( 'FreeSansBold.ttf', 18)
+# INVFONT = pygame.font(game_folder+'/FreeSansBold.ttf', 18)
+
+TimeFount = INVFONT.render("Elapsed Time:{0:02}".format(Minute)+ ":{0:02}".format(Second) ,1, BLACK)
+TimeFountR=TimeFount.get_rect()
+TimeFountR.center=(100,20)
+
+Clock = pygame.time.Clock()
+CLOCKTICK = pygame.USEREVENT+1
+pygame.time.set_timer(CLOCKTICK, 1000) # fired once every second
+
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("ROOMBA")
 clock = pygame.time.Clock()
@@ -294,11 +320,8 @@ running = True
 screen.fill(ROCKGRAY)
 
 
-
-
-
-
 while running:
+    
     # keep loop running at the right speed
     clock.tick(FPS)
     # Process input (events)
@@ -306,16 +329,30 @@ while running:
         # check for closing window
         if event.type == pygame.QUIT:
             running = False
+        if event.type == CLOCKTICK: # count up the clock
+            # https://stackoverflow.com/a/38051165
+            #Timer
+            Second=Second+1
+            if Second == 60:
+                Minute=Minute+1
+                Second=0
 
-    # Update
-    all_sprites.update()
-
-    table = load_tile_table(img_folder+"/tile.png", 10, 10)
+    # redraw background
+    screen.fill(ROCKGRAY)
+    table = load_tile_table("img/tile.png", 10, 10)
     for x, row in enumerate(table):
         for y, tile in enumerate(row):
             screen.blit(tile, (x*100, y*100))
 
-    # screen.fill(ROCKGRAY)
+    # redraw time
+    TimeFount = INVFONT.render("Elapsed Time:{0:02}".format(Minute)+ ":{0:02}".format(Second) ,1, BLACK)
+    screen.blit(TimeFount, TimeFountR)
+
+
+
+    # Update
+    all_sprites.update()
+
     for roomba in rommbasList:
         roomba.collisionCheck(all_sprites)
         pygame.draw.circle(screen, WHITE, roomba.rect.center, 40)
@@ -327,8 +364,7 @@ while running:
     #     dog.collisionCheck(dogList)
     #     dog.collisionCheck(obstaclesList)
     #     pygame.draw.circle(screen, GRAY, dog.rect.center, 40)
-
-
+    
     # Draw / render
 
     all_sprites.draw(screen)
