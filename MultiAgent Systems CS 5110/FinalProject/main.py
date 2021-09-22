@@ -20,6 +20,7 @@ print(sys.version)
 pygame.init()
 clock = pygame.time.Clock()
 
+MY_PLAYER = pygame.image.load('img/my_player1.png')
 PLAYER = pygame.image.load('img/player1.png')
 playerPos = [10,10]
 
@@ -92,7 +93,7 @@ while True:
     # keep loop running at the right speed
     clock.tick(FPS)
     ticks +=1
-    if ticks ==1000:
+    if ticks ==10000:
         GameOver(statInfo, resources, ticks, len(player_List), tilemap)
         pygame.quit()
 
@@ -225,7 +226,9 @@ while True:
         player_List.pop(playerIndex)
         #playerPos_list.pop(playerIndex)
     del tempDead_list[:]
-    DISPLAYSURF.blit(PLAYER,(playerPos[0]*TILESIZE,playerPos[1]*TILESIZE))
+    
+    # DISPLAYS my Player
+    DISPLAYSURF.blit(MY_PLAYER,(playerPos[0]*TILESIZE,playerPos[1]*TILESIZE))
 
     statInfo[FIREMEN]=len(player_List)
     statInfo[TURN]= ticks
