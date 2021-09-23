@@ -16,8 +16,8 @@ import numpy as np
 #WIDTH = 800
 #HEIGHT = 600
 FPS = 30
-WIDTH = 640 * 2
-HEIGHT = 480 * 2
+WIDTH = 500#640 * 2
+HEIGHT = 500#480 * 2
 
 #             R    G    B
 # define colors
@@ -239,8 +239,10 @@ class Roomba(MovingThing):
         self.theta = 30/np.pi
         self.thetaDot = 0
         
-        self.x_speed = -((self.vl + self.vr)/2 )* np.sin(self.theta)
-        self.y_speed = ((self.vl + self.vr)/2 )* np.cos(self.theta)
+        self.x_speed = 10
+        self.y_speed = 10
+        # self.x_speed = -((self.vl + self.vr)/2 )* np.sin(self.theta)
+        # self.y_speed = ((self.vl + self.vr)/2 )* np.cos(self.theta)
         self.magtude = math.sqrt(math.pow(self.x_speed, 2) + math.pow(self.y_speed, 2))
         
     def getMagtude(self):
@@ -263,59 +265,59 @@ class Roomba(MovingThing):
         # return rot_image,rot_rect
     
     # get next position 
-    def update(self):
-        dt = 1 #self.clock.tick(30)
+    # def update(self):
+    #     dt = 1 #self.clock.tick(30)
         
-        # print(dt)
-        # vx = (self.vr + self.vl)* 0.5 * np.cos(self.theta)
-        # vy = (self.vr + self.vl)* 0.5 * np.sin(self.theta)
+    #     # print(dt)
+    #     # vx = (self.vr + self.vl)* 0.5 * np.cos(self.theta)
+    #     # vy = (self.vr + self.vl)* 0.5 * np.sin(self.theta)
 
-        # self.rect.x +=  vx *dt
-        # self.rect.y +=  vy *dt
-        # self.theataDot = (self.vr/self.robtWidth) - (self.vl/self.robtWidth)  
-        # self.theta += self.theataDot * dt
+    #     # self.rect.x +=  vx *dt
+    #     # self.rect.y +=  vy *dt
+    #     # self.theataDot = (self.vr/self.robtWidth) - (self.vl/self.robtWidth)  
+    #     # self.theta += self.theataDot * dt
         
         
-        # self.iR = (self.robtWidth/2) *((self.vr + self.vl)/(self.vr - self.vl))
+    #     # self.iR = (self.robtWidth/2) *((self.vr + self.vl)/(self.vr - self.vl))
         
-        # forward  = (self.vl + self.vr)/2 * np.pi * self.wheelRadius
-        # lateral = -self.thetaDot  * self.iR * dt
+    #     # forward  = (self.vl + self.vr)/2 * np.pi * self.wheelRadius
+    #     # lateral = -self.thetaDot  * self.iR * dt
         
-        # self.rect.x += forward * np.cos(self.theta) - lateral * np.sin(self.theta)
-        # self.rect.y += forward * np.sin(self.theta) + lateral * np.cos(self.theta)
+    #     # self.rect.x += forward * np.cos(self.theta) - lateral * np.sin(self.theta)
+    #     # self.rect.y += forward * np.sin(self.theta) + lateral * np.cos(self.theta)
           
-        self.thetaDot += (self.vr - self.vl)/2
-        self.theta += self.thetaDot *dt
-        # self.theta += self.theta + dt
-        # self.theta = self.theta % (2*np.pi)
-        # print(self.theta)
+    #     self.thetaDot += (self.vr - self.vl)/2
+    #     self.theta += self.thetaDot *dt
+    #     # self.theta += self.theta + dt
+    #     # self.theta = self.theta % (2*np.pi)
+    #     # print(self.theta)
         
-        # self.rot_center()
+    #     # self.rot_center()
         
-        self.rect.x += -((self.vl + self.vr)/2 )* np.sin(self.theta)
-        self.rect.y += ((self.vl + self.vr)/2 )* np.cos(self.theta)
+    #     self.rect.x += -((self.vl + self.vr)/2 )* np.sin(self.theta)
+    #     self.rect.y += ((self.vl + self.vr)/2 )* np.cos(self.theta)
         
 
         
-        x, y = self.rect.center
-        # Stop when hitting a wall
-        if self.rect.top <= 0:
-            y = 25
-            # self.x_speed, self.y_speed = random_vec(self.magtude, "top")
+    #     x, y = self.rect.center
+    #     # Stop when hitting a wall
+    #     if self.rect.top <= 0:
+    #         y = 25
+    #         # self.x_speed, self.y_speed = random_vec(self.magtude, "top")
 
-        if self.rect.bottom >= HEIGHT:
-            y=HEIGHT - 25
-            # self.x_speed, self.y_speed = random_vec(self.magtude, "bottom")
+    #     if self.rect.bottom >= HEIGHT:
+    #         y=HEIGHT - 25
+    #         # self.x_speed, self.y_speed = random_vec(self.magtude, "bottom")
 
-        if self.rect.right >= WIDTH:
-            x = WIDTH - 25
-            # self.x_speed, self.y_speed = random_vec(self.magtude, "right")
+    #     if self.rect.right >= WIDTH:
+    #         x = WIDTH - 25
+    #         # self.x_speed, self.y_speed = random_vec(self.magtude, "right")
 
-        if self.rect.left <= 0:
-            x = 25
-            # self.x_speed, self.y_speed = random_vec(self.magtude, "left")
+    #     if self.rect.left <= 0:
+    #         x = 25
+    #         # self.x_speed, self.y_speed = random_vec(self.magtude, "left")
 
-        self.rect.center = (x,y)
+    #     self.rect.center = (x,y)
 
 class Dog(MovingThing):
     # sprite for the Player
@@ -359,12 +361,12 @@ class Game:
             all_sprites.add(roomba)
             rommbasList.add(roomba)
 
-        # Load dogs iin
-        for dog in range(0,1):
-            dog = Dog()
-            all_sprites.add(dog)
-            dogList.add(dog)
-            obstaclesList.add(dog)
+        # # Load dogs iin
+        # for dog in range(0,1):
+        #     dog = Dog()
+        #     all_sprites.add(dog)
+        #     dogList.add(dog)
+        #     obstaclesList.add(dog)
 
         ## Load obsticals in
         # for obs in range(60,random.randint(80,100)):
