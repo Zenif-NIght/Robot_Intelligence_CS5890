@@ -12,13 +12,26 @@ turn_arc = np.pi * (bot_width) #half arc Circumference
 
 x_side_length = 5
 y_side_length = 5
-area_to_cover =x_side_length * y_side_length # 5x5 =25 m^2
+area_to_cover = x_side_length * y_side_length # 5x5 =25 m^2
 
 # go_straight_down = np.array([y_side_length,-1,-1])
-# plan [time_duration , vl, vr]
-go_straight = np.array([y_side_length,1,1])
-turn_r_180 = np.array([1,turn_arc/1,0])
-turn_l_180 = np.array([1,0,turn_arc/1])
+# plan [time_duration , vFl, vFr,
+#                       vBl,vBr]
+go_straight = np.array([y_side_length,1,1,1,1])
+go_straight_back = np.array([y_side_length,-1,-1,-1,-1])
+
+turn_r_180 = np.array([1,
+                       turn_arc/1,0,
+                       turn_arc/1,0])
+turn_l_180 = np.array([.5,
+                       0,turn_arc/1,
+                       0,turn_arc/1])
+strafe_right = np.array([1,
+                         .3,-.3,
+                         -.3,.3])
+strafe_left = np.array([1,
+                        -.3,.3,
+                        .3,-.3])
 
 
 execution_plan =[] 
@@ -26,9 +39,10 @@ for i in range(0,int((x_side_length/bot_width)/2+1)):
 
     # print('Iteration:',i)
     execution_plan.append(go_straight)
-    execution_plan.append(turn_r_180)
-    execution_plan.append(go_straight)
-    execution_plan.append(turn_l_180)
+    execution_plan.append(strafe_right)
+    execution_plan.append(go_straight_back)
+    execution_plan.append(strafe_right)
+
 
 t_step = 0.01 
 
@@ -75,19 +89,34 @@ for i in range(0,len(execution_plan)):
         xDot_list = np.append(xDot_list,xDot)
         yDot_list = np.append(yDot_list,yDot)
         Psi_dot_list = np.append(Psi_dot_list,Psi_dot)
-        vl = execution_plan[i][1]
-        vr = execution_plan[i][2]
         
-        Psi_dot = (vr - vl)/ bot_width
+        vFl = execution_plan[i][1]
+        vFr = execution_plan[i][2]
+        vBl = execution_plan[i][3]
+        vBr = execution_plan[i][4]
+        
+        
+        Psi_dot = ((vFr+vBr) - (vFl+vBl))/ bot_width
+
+        
         psi =  psi + Psi_dot *t_step
-        xDot = -((vl + vr)/2 )* np.sin(psi) 
-        yDot = ((vl + vr)/2 )* np.cos(psi) 
         
-        x += xDot * t_step#-v *np.sin(psi) * t_step
-        y += yDot * t_step#  v* np.cos(psi) * t_step
+        # Should we strafe 
+        if((vFl == vBr and vFr == vBl )and  (vFl != vFr and vBr != vBl )):
+            
+            xDot = ((vFl + vBr)/2 )* np.cos(psi) 
+            yDot = ((vFr + vBl)/2 )* np.sin(psi) 
+        else:
+            xDot = -((vFl + vFr)/2 )* np.sin(psi) 
+            yDot = ((vFl + vFr)/2 )* np.cos(psi) 
+
+        
+        
+        x += xDot * t_step
+        y += yDot * t_step
         
 
-    ax.plot(xlist, ylist,marker='o' , linewidth=LINEWIDTH)
+    ax.plot(xlist, ylist,linewidth = LINEWIDTH)
     
     ax.spines['left'].set_position('zero')
     ax.spines['right'].set_color('none')

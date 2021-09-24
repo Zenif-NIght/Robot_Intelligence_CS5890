@@ -53,7 +53,5 @@ for i in range(0,num_runs):
     ax.spines['bottom'].set_position('zero')
     ax.spines['top'].set_color('none')
 
-
-
 plt.ioff()
 plt.show()
