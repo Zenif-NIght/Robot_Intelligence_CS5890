@@ -15,19 +15,19 @@ y_side_length = 5
 area_to_cover =x_side_length * y_side_length # 5x5 =25 m^2
 
 # plan [time_duration , vl, vr]
-go_straight_up = np.array([y_side_length,1,1])
-go_straight_down = np.array([y_side_length,-1,-1])
+go_straight = np.array([y_side_length,1,1])
+# go_straight_down = np.array([y_side_length,-1,-1])
 turn_r_180 = np.array([1,turn_arc/1,0])
-turn_l_180 = np.array([1,-turn_arc/1,0])
+turn_l_180 = np.array([1,0,turn_arc/1])
 
 
 execution_plan =[] 
 for i in range(0,int((x_side_length/bot_width)/2+1)):
 
     # print('Iteration:',i)
-    execution_plan.append(go_straight_up)
+    execution_plan.append(go_straight)
     execution_plan.append(turn_r_180)
-    execution_plan.append(go_straight_down)
+    execution_plan.append(go_straight)
     execution_plan.append(turn_l_180)
 
 t_step = 0.01 
@@ -49,6 +49,7 @@ Psi_dot = 0
 
 x = 0 
 y = 0
+psi = 0 
 
 xDot_list =[]
 yDot_list =[]
@@ -59,7 +60,6 @@ execution_plan = np.array(execution_plan)
 plotLIst = []
 for i in range(0,len(execution_plan)):
     
-    psi = 0 
 
     xlist =[]
     ylist =[]
